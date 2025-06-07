@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Prompting Stages Guide - UW Bothell Style</title>
+  <style>
+    /* University of Washington Bothell Branding Colors */
+    :root {
+      --uwb-purple: #4B2E83;
+      --uwb-gold: #B7A57A;
+      --uwb-white: #FFFFFF;
+    }
+
+    /* Global Styles */
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(black);
+      color: #000;
+    }
+    a {
+      color: var(--uwb-gold);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Header */
+    .header {
+      background-color: var(--uwb-purple);
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      color: var(--uwb-white);
+    }
+    .header img {
+      height: 40px;
+      margin-right: 15px;
+    }
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .nav-links {
+      margin-left: auto;
+    }
+    .nav-links a {
+      margin-left: 20px;
+      font-size: 0.95rem;
+      color: var(--uwb-white);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      background: var(--uwb-white);
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: var(--uwb-purple);
+      margin-bottom: 20px;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    /* Slider Styles */
+    .slider-container {
+      width: 100%;
+      height: 260px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      position: relative;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    .slider {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+      height: 100%;
+    }
+    .flip-card {
+      background-color: transparent;
+      width: 100%;
+      perspective: 1000px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* flip‐panel container becomes a grid */
+.flip-card-inner {
+  display: grid;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  width: 100%;
+}
+
+/* both faces occupy the same grid cell */
+.face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  border: 2px solid var(--uwb-purple);
+  border-radius: 4px;
+  padding: 15px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  line-height: 1.4;
+  max-height: 400px;
+  overflow: hidden;
+  background: var(--uwb-white);
+}
+
+/* front vs back colors & rotation */
+.face.front { background: #EEF2FA; }
+.face.back {
+  background: #FAEEF1;
+  transform: rotateY(180deg);
+}
+
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--uwb-purple);
+      border-radius: 4px;
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: var(--uwb-white);
+      font-size: 1rem;
+      line-height: 1.4;
+      color: #000;
+    }
+    .flip-card-front {
+      background-color: #EEF2FA;
+    }
+    .flip-card-back {
+      background-color: #FAEEF1;
+      transform: rotateY(180deg);
+    }
+    
+    /* --------------------------
+   CARD + MODAL STYLES ONLY
+   -------------------------- */
+
+/* make each card stack its inner panel + link vertically */
+.flip-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* give some breathing room between card border and the link */
+.show-more {
+  margin-top: 12px;
+}
+
+
+.flip-card-inner {
+  width: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.face {
+  position: relative;
+  width: 100%;
+  backface-visibility: hidden;
+  border: 2px solid var(--uwb-purple);
+  border-radius: 4px;
+  padding: 15px;
+  box-sizing: border-box;
+  background: var(--uwb-white);
+  font-size: 1rem;
+  line-height: 1.4;
+  max-height: 200px;
+  max-width: 900px
+  overflow: hidden;
+}
+
+.face.front {
+  background: #EEF2FA;
+}
+
+.face.back {
+  background: #FAEEF1;
+  transform: rotateY(180deg);
+}
+
+
+/* Full-screen modal */
+#modal {
+  display: none;
+  position: fixed; top: 0; left: 0;
+  width: 100vw;      height: 100vh;
+  background: rgba(0,0,0,0.7);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--uwb-white);
+  padding: 20px;
+  border-radius: 6px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: var(--uwb-purple);
+}
+
+.modal-content p {
+  white-space: pre-wrap;
+}
+
+.close {
+  position: absolute;
+  top: 10px; right: 10px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+
+    /* Controls */
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      color: var(--uwb-purple);
+      background: var(--uwb-gold);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      user-select: none;
+      margin: 0 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: background 0.3s;
+    }
+    .arrow:hover {
+      background: #a48d6d;
+    }
+
+    /* Summary Box */
+    .summary {
+      background: var(--uwb-gold);
+      padding: 15px;
+      border-radius: 4px;
+      font-size: 1rem;
+      color: var(--uwb-purple);
+      line-height: 1.4;
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 30px;
+      text-align: center;
+    }
+    .disclaimer a {
+      color: var(--uwb-purple);
+      font-weight: bold;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: var(--uwb-purple);
+      color: var(--uwb-white);
+      text-align: center;
+      padding: 15px 0;
+      margin-top: 10px;
+    }
+    .footer a {
+      color: var(--uwb-white);
+      margin: 0 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- CARD-ONLY modal -->
+<div id="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">✕</span>
+    <h2 id="modal-prompt"></h2>
+    <p id="modal-response"></p>
+  </div>
+</div>
+
+
+  <!-- Header with UW Bothell Branding -->
+  <header class="header">
+    <img src="https://www.uwb.edu/images/logos/uwbothell_fullcolor_horiz.png" alt="UW Bothell Logo">
+    <span class="header-title">AI Prompting Stages Guide</span>
+    <nav class="nav-links">
+      <a href="https://www.uwb.edu">UW Bothell Home</a>
+      <a href="https://www.uwb.edu/academics">Academics</a>
+      <a href="https://www.uwb.edu/admissions">Admissions</a>
+      <a href="https://www.uwb.edu/academic-support-programs/wacc">Writing Center</a>
+    </nav>
+  </header>
+
+
+
+  <div class="container">
+  	<div>
+  		<h1 style="text-align: left;">What is AI Prompting</h1>
+    	<p>AI prompting involves giving clear and purposeful input to an AI tool in order to guide its response. The quality of a prompt can shape how useful or accurate the AI's output is.</p> <p>Effective prompting allows you to guide AI tools in ways that support the writing process without replacing critical thinking or original work.</p>
+  	</div>
+  
+  
+  
+  	<div>
+  		<h1 style="text-align: left;">How To Write A Good Prompt</h1>
+<ol>
+  <li>
+    <strong>State Your Goal</strong>
+    <ul>
+      <li>Summarize in one sentence what you want (e.g., “Translate this text into layman’s terms”).</li>
+      <li>Mention why (e.g., “For middle-school readers”).</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Give Context</strong>
+    <ul>
+      <li>Include or describe the source material (text, data, code).</li>
+      <li>Specify audience and tone (e.g., “Explain as if to a non-technical manager”).</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Structure the Prompt</strong>
+    <ul>
+      <li>Instruction: One imperative verb + task (e.g., “List,” “Compare,” “Generate”).</li>
+      <li>Context/Reference: Paste or describe relevant passages or data.</li>
+      <li>Requirements: Format (e.g., bullet points, JSON), length limits, style guidelines.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Be Specific</strong>
+    <ul>
+      <li>Avoid vague words like “Explain well.” Instead, say “Explain in ≤150 words, using three headings.”</li>
+      <li>Define any acronyms or specialized terms.</li>
+      <li>Clarify edge cases (“If no data is available, state ‘N/A’”).</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Specify Output Format</strong>
+    <ul>
+      <li>Outline formatting rules (“Use Markdown headings,” “Return a numbered list,” “Respond in JSON with keys ‘title’ and ‘summary’”).</li>
+      <li>Note language/style (“Formal tone,” “Active voice,” “American English”).</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Anticipate Pitfalls</strong>
+    <ul>
+      <li>Narrow the scope to prevent drift (“Focus only on economic factors, not social ones”).</li>
+      <li>Tie pronouns to nouns (“‘It’ refers to the software license”).</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Test &amp; Refine</strong>
+    <ul>
+      <li>Run the prompt, compare output vs. expectations.</li>
+      <li>Tweak one element at a time (e.g., adjust word count if it’s too long).</li>
+    </ul>
+  </li>
+</ol>
+
+  	</div>
+  </div>
+  
+  
+  
+  <!-- Main Content Container -->
+  <div class="container">
+    <h1 style="text-align: left;">Explore</h1>
+    <select id="stageSelect">
+      <option value="">-- Select a Stage --</option>
+      <option value="stage1">Stage 1: Brainstorming</option>
+      <option value="stage2">Stage 2: Outlining</option>
+      <option value="stage3">Stage 3: Drafting</option>
+      <option value="stage4">Stage 4: Revising</option>
+      <option value="stage5">Stage 5: Editing</option>
+    </select>
+
+    <div class="slider-container">
+      <div class="slider" id="slider">
+        <!-- Cards will be injected here -->
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="arrow" onclick="prevCard()">&#9664;</button>
+      <button class="arrow" onclick="nextCard()">&#9654;</button>
+    </div>
+
+    <div id="summary" class="summary"></div>
+
+
+
+	<div class="container">
+  	<h1 style="text-align: left;">Ethical Use</h1>
+    	<p>Ethical use of AI in writing involves using the technology to support, not replace, a student's original thinking and voice. Students are expected to follow UWB’s academic integrity guidelines when using AI tools. 
+		</p> 
+		<p>This includes properly revising AI-generated content, ensuring all work reflects their own understanding, and consulting instructors when unsure about appropriate use.
+        </p>
+  	</div>
+
+
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      Disclaimer: Use AI according to <a href="https://www.uwb.edu/student-affairs/studentconduct/studentconduct-3" target="_blank">UWB Academic Integrity Guidelines</a>.
+    </div>
+  </div>
+
+
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025 University of Washington Bothell. <a href="https://www.uwb.edu/">Home</a> | <a href="https://www.uwb.edu/marketing-communications/website/privacy">Privacy</a> | <a href="https://www.uwb.edu/contact">Contact</a></p>
+  </footer>
+
+  <script>
+  const data = {
+    stage1: {
+      cards: [
+        { prompt: `I’m applying to study public health and want to highlight my volunteer work at a local clinic and my interest in health equity. Can you help me brainstorm personal statement topics that reflect these experiences?`, response: `Absolutely! Your volunteer work and passion for health equity are powerful themes that can make your personal statement stand out. Here are a few angles you might consider:
+
+1. A Defining Moment in the Clinic – Share a specific patient interaction or experience that deepened your understanding of health disparities and reinforced your commitment to public health.
+
+2. The Bridge Between Experience and Aspiration – Connect the lessons you’ve learned at the clinic with your long-term goals, showing how hands-on experience has shaped your vision for a healthier, more equitable future.
+
+3. Health Equity Through a Personal Lens – If there’s a personal story or background that informs your interest in health equity, weaving that into your narrative can add depth and authenticity.
+
+4. Innovative Solutions to Systemic Challenges – Reflect on challenges you’ve observed in the clinic and discuss ideas or aspirations for addressing these barriers through policy, research, or community outreach.
+
+5. The Power of Public Health in Action – Describe how volunteering has transformed your understanding of public health beyond textbooks, emphasizing real-world impact and grassroots efforts.
+
+Would you like help refining one of these ideas into an outline?` },
+        { prompt: `Suggest some personal statement topics for a college application focused on academic and extracurricular experiences.`, response: `Great choice for a personal statement! Here are some topics that blend academic achievements with extracurricular experiences to showcase your unique journey:
+
+1. The Intersection of Passion and Learning – Describe how an extracurricular activity (e.g., robotics, theater, debate) deepened your academic interests and influenced your future aspirations.
+
+2. Overcoming Challenges in an Academic Setting – Share a moment where you faced an academic struggle and how extracurricular involvement helped you develop resilience and problem-solving skills.
+
+3. Leadership Beyond the Classroom – Highlight a leadership role in an organization or club and how those experiences shaped your approach to teamwork, responsibility, and intellectual curiosity.
+
+4. A Research or Creative Project That Changed You – Discuss a significant academic or extracurricular project, competition, or experiment that transformed your thinking or solidified your career ambitions.
+
+5. Community Engagement Through Academics and Activities – Show how you connected classroom learning with service projects, mentorship programs, or advocacy work to create meaningful change.
+
+6. Balancing Academics and Passion – Reflect on the challenges and rewards of juggling schoolwork with a time-intensive extracurricular commitment, such as music, athletics, or entrepreneurship.
+
+7. A Defining Moment in Your Education Journey – Narrate an experience—perhaps an inspiring teacher, a breakthrough discovery, or an extracurricular challenge—that shaped your intellectual growth.
+
+These ideas can help craft a compelling statement that illustrates your strengths, passions, and personal growth. Which one resonates most with you?` },
+        { prompt: `What should I write my personal statement about?`, response: `Your personal statement is your chance to show what makes you, you. It should capture your passions, experiences, and values in a way that feels authentic and compelling. Here are a few directions you could explore:
+
+1. A Defining Moment – Was there a turning point that shaped who you are today? Maybe a challenge you overcame, a realization that changed your perspective, or an experience that pushed you to grow.
+
+2. A Passion that Drives You – Whether it's art, science, activism, or something entirely unique, writing about what fuels your curiosity and excitement can create a powerful narrative.
+
+3. A Personal Journey – You could reflect on how your background, identity, or experiences—whether cultural, familial, or personal—have influenced your ambitions.
+
+4. A Problem You Want to Solve – If there’s an issue in the world that deeply concerns you, sharing why it matters to you and how you hope to make a difference could be an inspiring angle.
+
+Do any of these resonate with you? If you'd like, I can help refine your ideas or workshop a structure for you!` }
+      ],
+      summary: {
+        good: `This prompt is clear, specific, and personal. It gives the AI enough context to generate focused and relevant ideas. To write a prompt like this, reflect on your experiences and goals before using AI. A clear purpose leads to more useful results.`,
+        ok: `This prompt gives the AI a general focus but lacks personal detail. The results are more relevant than a vague prompt but still broad and impersonal. For stronger results, add examples of activities or goals you want to highlight.`,
+        bad: `This prompt is too vague—it doesn’t specify your goals or audience, so the AI’s suggestions may be off-topic.`
+      }
+    },
+    stage2: {
+      cards: [
+        { prompt: `Using the ideas we brainstormed about volunteering and health equity, can you help me write an outline for my personal statement?`, response: `Absolutely! Here's a possible structure based on your volunteering and interest in health equity:
+
+I. Introduction: Personal Connection to Healthcare Disparities
+- Start with a brief anecdote from your volunteering experience that illustrates a specific challenge a patient faced (e.g., lack of access, financial barriers, or systemic inequities).
+- Explain how this experience sparked your deeper interest in public health and equity.
+- End with a clear thesis statement that expresses your commitment to addressing healthcare disparities.
+
+II. Experience & Growth: Volunteering at the Clinic
+- Provide an overview of your role and responsibilities at the clinic.
+- Describe key lessons learned from interacting with patients and witnessing structural healthcare barriers.
+- Reflect on how these experiences shaped your understanding of public health beyond textbooks and statistics.
+
+III. Broader Perspective: Connecting to Health Equity & Systemic Change
+- Discuss your recognition of systemic inequities in healthcare (based on observations and personal experiences).
+- Show how your volunteer work reinforced your belief in the importance of policy, research, or community engagement in tackling disparities.
+- Mention any efforts you've taken to advocate for equity beyond the clinic—like projects, discussions, or personal reflections.
+
+IV. Future Goals: Public Health & Advocacy
+- Explain how your experiences have solidified your desire to study public health at UWB.
+- Outline your aspirations to make a tangible impact—through research, policy, service, or advocacy.
+- Share the values you hope to bring to the field and the unique perspective shaped by your experiences.
+
+V. Conclusion: Reaffirming Your Commitment
+- Reflect on the lasting impact of your time at the clinic.
+- Tie back to the opening anecdote to reinforce your motivation.
+- End with a final statement of your passion and commitment to making healthcare more equitable.
+
+Does this structure reflect the core themes you want to highlight? I’d be happy to refine it further based on your focus.` },
+        { prompt: `Make an outline for a personal statement that includes both academics and volunteering.`, response: `Of course! Here's a structured outline to guide your writing:
+
+1. Introduction
+- Start with a compelling hook—perhaps an anecdote, a personal reflection, or a defining moment.
+- Introduce your academic interests and passion for volunteering, connecting them to a broader theme (e.g., community impact, personal growth, or a commitment to change).
+
+2. Academic Journey
+- Discuss your academic interests and experiences (specific courses, projects, or challenges).
+- Explain what drew you to this field and how your studies have shaped your perspective.
+- Highlight any achievements, skills, or intellectual growth relevant to your chosen path.
+
+3. Volunteer Experience & Impact
+- Share your volunteer experiences, focusing on a meaningful moment or lesson learned.
+- Connect these experiences to your academic goals—how they reinforced your passion, expanded your knowledge, or shaped your career aspirations.
+- If applicable, describe any leadership roles, problem-solving moments, or community impact.
+
+4. Bridging Academics & Volunteering
+- Reflect on how your academic interests and volunteer work complement each other.
+- Highlight a key insight or transformation that emerged from engaging in both areas.
+- Demonstrate how these experiences make you a strong candidate for your desired program.
+
+5. Conclusion
+- Reaffirm your commitment to your academic and service-driven path.
+- End with a forward-looking statement—how this opportunity will help you continue growing, learning, and making a difference.
+- Tie everything back to your central theme, leaving a lasting impression.
+
+Would you like me to help refine specific sections or tailor this further to your unique experiences?` },
+        { prompt: `Can you make a quick outline for my college essay? It’s about something I did last year.`, response: `Absolutely! Here's a clear outline to help you develop your college essay:
+
+Introduction  
+- Start with a compelling hook—perhaps a specific moment or realization from your experience.  
+- Briefly introduce what you did last year and why it was meaningful.  
+- End with a thesis statement that connects the experience to your personal growth and future aspirations.  
+
+Body Paragraph 1: The Experience  
+- Describe what you did last year in detail—where, when, and how you got involved.  
+- Highlight any challenges you faced or key moments that shaped your understanding of the experience.  
+
+Body Paragraph 2: What You Learned & Its Impact  
+- Reflect on how the experience shaped your perspective, skills, or values.  
+- Discuss any personal growth—did it reinforce your commitment to health equity or expand your understanding of public health challenges?  
+- If relevant, mention how this inspired further action, such as continued volunteer work or academic interests.  
+
+Body Paragraph 3: Connection to Your Future Goals  
+- Explain how this experience aligns with your aspiration to study public health at UWB.  
+- Tie it into your long-term goal of addressing health disparities and promoting equity.  
+- Show how this moment was a stepping stone toward a larger vision for making an impact.  
+
+Conclusion  
+- Reflect on the significance of this experience in shaping who you are today.  
+- End with a forward-looking statement—how will this experience continue to inspire and guide your journey?  
+
+Let me know if you'd like help refining any section or tailoring it more to your specific story.` }
+      ],
+      summary: {
+        good: `This prompt is specific and builds directly on your earlier brainstorming. The AI knows what to focus on, so the outline includes meaningful sections like your personal story, what you learned, and your future goals.
+It gives you a strong structure, but it's still important to revise it based on what you actually want to say. Use the AI’s draft to organize your ideas, then adjust it to match your voice and purpose.`,
+        ok: `This prompt gives the AI a clear direction, which leads to a more balanced and relevant structure.
+The outline includes useful sections, but without personal details, the ideas remain broad.
+To improve the output, add one or two specific experiences or goals that connect these areas.`,
+        bad: `This prompt is too vague. The AI has to guess what the essay is about, which leads to a basic, generic outline. The structure lacks depth and doesn’t highlight personal growth or future goals.
+
+To get better results, include information about what you’ve brainstormed such as the experience, key themes, or what you want the essay to show about you.`
+      }
+    },
+    stage3: {
+      cards: [
+        { prompt: `Based on my outline about my clinic volunteering and health equity interest, help me write a draft of my personal statement introduction?`, response: `The first time I stepped into the community clinic, I thought I understood public health. I had read about health disparities, studied the statistics, and engaged in classroom debates about systemic inequities. But sitting across from patients who struggled to navigate the healthcare system, I realized understanding wasn’t enough. I saw the frustration of a mother unable to afford medication for her child, the quiet exhaustion of a senior citizen juggling multiple jobs while managing chronic illness. These moments transformed my academic knowledge into something urgent and personal.
+        
+Volunteering at the clinic gave me more than experience—it deepened my commitment to health equity. I wasn’t just assisting with paperwork; I was listening, learning, and grappling with the realities of inaccessible care. In my health sciences coursework, these same disparities took shape in discussions about policy, ethics, and solutions. The intersection of hands-on service and academic exploration solidified my purpose: to bridge the gap between knowledge and action, to advocate for communities like the one I served, and to pursue public health as both a career and a mission.
+` },
+        { prompt: `Write a college essay introduction based on volunteer and school experiences.`, response: `I always believed healthcare should be accessible to everyone, but it wasn’t until I volunteered at a community clinic that I truly saw the gaps in the system. Assisting patients with paperwork and helping them navigate their care, I witnessed firsthand the challenges they faced—language barriers, financial struggles, and a lack of resources. It was eye-opening to see how these obstacles impacted real people, not just statistics in a textbook.
+        
+My experiences in school reinforced what I saw at the clinic. In my health sciences classes, discussions on equity and policy helped me understand the broader picture of systemic disparities. Volunteering gave me the hands-on perspective, while my studies helped me analyze possible solutions. These experiences together shaped my passion for public health and strengthened my desire to work toward meaningful change.
+` },
+        { prompt: `Can you write my college essay intro? It’s for public health.`, response: `The waiting room was full—families, elderly patients, people who had traveled miles just to see a doctor. As I assisted with intake forms, I noticed the uncertainty in their faces, the quiet hesitation in their voices. It wasn’t just about medical care; it was about access, trust, and systemic gaps that left communities underserved.
+        
+My interest in public health stems from moments like these, where individual stories reveal the broader challenges in healthcare systems. In my coursework, I explored health policies and their impact, but it was through real-world experiences that I understood the urgency behind them. I want to pursue public health not just to analyze the problems, but to be part of the solutions that make care more equitable for all.
+` }
+      ],
+      summary: {
+        good: `This prompt is clear, specific, and builds on earlier ideas. The AI creates an introduction that feels personal, reflective, and grounded in real experience.
+It connects your volunteering to your goals and shows meaningful insight, not just description.To make the most of this draft, add your own voice go beyond what happened and explain why it mattered to you. This is how you turn AI output into your own story.
+`,
+        ok: `This prompt gives the AI a clear topic and includes real experiences, but it still produces a generic response.
+The introduction summarizes events without showing who you are or why they matter. It lacks vivid detail, voice, and personal reflection. To get a stronger draft, guide the AI by naming what you want the reader to understand about you not just what you did.`,
+        bad: `This prompt is too vague. The AI has no context about your story, so the introduction stays broad and generic.
+The content mentions healthcare and interest in public health, but it lacks depth and personal connection. To improve the results, include a specific experience or theme to help the AI focus on what matters most to you.`
+      }
+    },
+    stage4: {
+      cards: [
+        { prompt: `Can you revise this personal statement paragraph to improve clarity and flow while keeping my original tone and ideas? Here it is: [Insert Draft Paragraph]`, response: `While volunteering at the clinic, I realized that public health is so much more than what I had read in textbooks. I helped patients fill out forms, translated for those who didn’t speak English, and listened as many shared how difficult it was just to access the care they needed. One woman couldn’t get her insulin because of an insurance issue, and that really stuck with me. Experiences like that made me feel like the system is broken—and made me wonder if I could help fix it by working in the field. I had learned about healthcare equity in school, but this was different. It was real. That’s why I want to study public health: to do something meaningful and help create lasting change. I remember feeling frustrated—not because I didn’t know what to do, but because I saw how little support patients had beyond what we could offer. That frustration turned into motivation, and now I want to learn how to address the root causes of these problems, not just react to them.` },
+        { prompt: `Make this sound a bit smoother and easier to read. Here it is: [see below]`, response: `When I was volunteering at the clinic, I realized that public health is so much more than what I had read in textbooks. I helped patients fill out forms, translated for those who didn’t speak English, and listened to many share how difficult it was just to access the care they needed. One woman couldn’t get her insulin because of an insurance issue, and that really stuck with me. Experiences like that made me feel like the system is broken—and made me wonder if I could help fix it by working in the field.
+
+I had learned about healthcare equity in school, but this was different. It was real. That’s why I want to study public health: to do something meaningful and help create lasting change. I remember feeling frustrated—not because I didn’t know what to do, but because I saw how little support patients had beyond what we could offer. That frustration turned into motivation. I want to understand the root causes of these problems, not just respond to them.` },
+        { prompt: `Make this better: [see below]`, response: `During my time volunteering at the clinic, I came to understand that public health is far more complex and human than anything I had read in textbooks. I assisted patients with paperwork, translated for those who didn’t speak English, and listened to countless stories about the challenges people faced just trying to access basic care. One woman, for example, couldn’t get her insulin due to an issue with her insurance. That moment stuck with me—it was frustrating and heartbreaking.
+
+Experiences like that made me realize how deeply flawed the system can be, and how urgent the need is for change. I had learned about healthcare equity in class, but seeing it play out in real life was different. It wasn’t just a concept—it was a daily struggle for real people.
+
+That frustration turned into motivation. I didn’t feel helpless because I lacked knowledge—I felt driven because I saw how little support patients had beyond what we could offer. I want to study public health so I can be part of the solution, not just respond to the symptoms of a broken system. I want to help create meaningful, lasting change.` }
+      ],
+      summary: {
+        good: `Summary:
+The AI revised the paragraph to improve sentence flow, transitions, and tone while keeping the original structure and voice intact. It enhanced clarity without over-polishing or adding ideas that weren’t already present.
+
+Strengths:
+- Improved sentence rhythm and word choice without changing meaning
+- Preserved the writer’s voice and intent
+- Added better transitions and clarity between ideas
+- Cleaned up redundancy and awkward phrases
+
+Weaknesses:
+- Slightly more formal than the original tone (minor shift)
+- One or two phrases feel slightly AI-polished rather than natural student voice
+
+Takeaway / Advice for Students:
+If you want AI to clean up your writing but still sound like you, be specific about what to change (e.g., “just flow and tone”). A detailed prompt like this gives the best balance between helpful edits and keeping your original voice.
+`,
+        ok: `Summary:
+The AI made the paragraph easier to read by simplifying phrases and smoothing out transitions. It preserved the core message but made more edits than what was asked for, which slightly shifted the tone and style.
+
+Strengths:
+- Cleaned up repetitive or clunky phrasing
+- Simplified sentence structure for better readability
+- Added light transitions
+
+Weaknesses:
+- Rephrased some emotional language (e.g., “that really bothered me” became “that really stuck with me”), which slightly softened the raw, personal tone.
+- Tone feels a more generic and slightly less personal
+- Shortened and tightened to the point of losing student voice in places
+
+Takeaway / Advice for Students:
+A vague prompt like “make it smoother” gives AI too much freedom. If you want to keep your personal voice or structure, make sure to be clearer about what you want to preserve or else the edits may feel more like a rewrite than a revision.
+`,
+        bad: `Summary:
+AI produced a well-written and emotional paragraph, but it significantly rewrote the original. It changed sentence structure, added phrasing that wasn’t there, and shifted the tone toward being more mature and professional.
+
+Strengths:
+- Very clear and well-organized
+- Strong emotional language and polish
+- Flow and transitions are excellent
+
+Weaknesses:
+- A lot different from the original (more of a rewrite than a revision)
+- Loses student’s real voice and phrasing
+- Adds content that wasn’t in the original draft
+
+Takeaway / Advice for Students:
+If your prompt is too vague, AI might do too much. "Make it better" tells the AI to guess what you want, which often leads to losing your personal story, tone, or structure. For small changes, be more specific.`
+      }
+    },
+    stage5: {
+      cards: [
+        { prompt: `Can you check this paragraph for grammar and punctuation only, and leave everything else the same? Here it is: [see below]`, response: `When I was volunteering at the clinic, I realized public health is more than just what’s in the textbooks that I have read. I helped patients with forms, translating for some who didn’t speak English, and heard a lot of people talk about how hard it was just to get care that they need. One woman cannot get her insulin because of some insurance thing, and it really bothered me. Stuff like that made me feel like the system is broken and maybe I could do something to help if I was working in the field. I learned about healthcare equity in school, but this was different. That’s why I want to study public health—to do something that matters and help make an impactful change. I remember feeling frustrated not because I didn’t know what to do, but because I realized how little support patients had outside of our help. That frustration turned into motivation, which made me want to learn how to fix the root of the problem, not just respond to it.
+` },
+        { prompt: `Please correct grammar and spelling. Here’s the text: [see below]`, response: `When I was volunteering at the clinic, I realized that public health is more than just what’s in the textbooks I’ve read. I helped patients with forms, translated for some who didn’t speak English, and heard many people talk about how hard it was just to get the care they needed. One woman couldn’t get her insulin because of an insurance issue, and it really bothered me. Experiences like that made me feel like the system is broken—and maybe I could do something to help if I worked in the field.
+
+I had learned about healthcare equity in school, but this was different. That’s why I want to study public health: to do something that matters and help create meaningful change. I remember feeling frustrated—not because I didn’t know what to do, but because I realized how little support patients had outside of our help. That frustration turned into motivation, which made me want to learn how to fix the root of the problem, not just respond to it.` },
+        { prompt: `Fix the grammar: [see below]`, response: `When I was volunteering at the clinic, I realized that public health is more than just what’s in the textbooks I’ve read. I helped patients with forms, translated for some who didn’t speak English, and listened to many people talk about how hard it was just to get the care they needed. One woman couldn’t get her insulin because of an insurance issue, and it really bothered me. Experiences like that made me feel like the system is broken—and that maybe I could do something to help if I worked in the field.
+
+I had learned about healthcare equity in school, but this was different. That’s why I want to study public health: to do something that matters and help create meaningful change. I remember feeling frustrated—not because I didn’t know what to do, but because I realized how little support patients had outside of our help. That frustration turned into motivation, which made me want to learn how to fix the root of the problem, not just respond to it.` }
+      ],
+      summary: {
+        good: `Summary:
+The AI fixed grammar and punctuation issues (e.g., capitalization, verb agreement, comma placement) while preserving the original structure, phrasing, and personal tone.
+
+Strengths:
+- Corrected key grammar issues (e.g., “turn into” → “turned into”; “i” → “I”; “alot” → “a lot”)
+- Preserved original word choices and paragraph structure
+- Did not over-edit or rewrite content
+
+Weaknesses:
+- Some awkward phrasing (e.g., “some insurance thing”) was left untouched
+- Slight inconsistencies in tone remain, because stylistic edits weren’t applied
+
+Takeaway / Advice for Students:
+This is the best option when you want clean grammar without changing your voice. If your goal is to sound like you but with fewer errors, be clear and specific in your prompt like: “Fix grammar and punctuation only.”`,
+        ok: `Summary:
+The AI corrected grammar and spelling while making slight edits to improve flow and clarity. It made minor tone adjustments and changed a few word choices to sound more polished.
+
+Strengths:
+- Grammar and punctuation were fully corrected
+- Sentence flow improved slightly in spots
+- Some informal language (e.g., “insurance thing”) was improved
+
+Weaknesses:
+- Made edits beyond grammar, including slight rephrasing
+- Tone became more polished than intended
+- The student’s original voice was softened in some places
+
+Takeaway / Advice for Students:
+Even with a simple prompt like “fix grammar,” AI makes more changes than what you asked for. If you want to avoid unexpected edits, add limits like “don’t change sentence structure” or “keep my original phrasing.”
+`,
+        bad: `Summary:
+The AI fixed grammar but also reworded sentences, enhanced transitions, and added emphasis for emotional impact. It significantly changed tone and structure beyond basic corrections.
+
+Strengths:
+- Strong grammar and polished output
+- Enhanced clarity and readability
+- Flow and transitions improved significantly
+
+Weaknesses:
+- Rewrote portions of the paragraph
+- Changed tone and structure too much for a “grammar-only” task
+- Removed informal or natural student phrasing
+
+Takeaway / Advice for Students:
+Short prompts like “fix the grammar” are too vague and give AI too much room to interpret. If you only want light edits, be more specific. Otherwise, you will most likely get a rewrite instead of a revision.`
+      }
+    },
+  };
+
+  const stageSelect = document.getElementById('stageSelect');
+  const slider = document.getElementById('slider');
+  const summaryEl = document.getElementById('summary');
+  let currentCardIndex = 0;
+
+  function renderCards(stage) {
+    slider.innerHTML = '';
+    data[stage].cards.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'flip-card';
+      card.innerHTML = `
+        <div class="flip-card-inner">
+          <div class="face front">${c.prompt.replace(/\n/g,'<br>')}</div>
+          <div class="face back">${c.response.replace(/\n/g,'<br>')}</div>
+        </div>
+        <div class="show-more">Show More</div>
+      `;
+      card.querySelectorAll('.face').forEach(face => face.addEventListener('click', () => card.classList.toggle('flipped')));
+      card.querySelector('.show-more').addEventListener('click', () => {
+        document.getElementById('modal-prompt').textContent = c.prompt;
+        document.getElementById('modal-response').textContent = c.response;
+        document.getElementById('modal').style.display = 'flex';
+      });
+      slider.appendChild(card);
+    });
+    currentCardIndex = 0;
+    slider.style.transform = 'translateX(0)';
+  }
+
+  function renderSummary(stage) {
+    const s = data[stage].summary;
+    summaryEl.innerHTML = `
+      <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">
+Good:
+${s.good}
+
+OK:
+${s.ok}
+
+Bad:
+${s.bad}
+      </pre>
+    `;
+  }
+
+  function nextCard() {
+    const total = slider.children.length;
+    if (!total) return;
+    currentCardIndex = (currentCardIndex + 1) % total;
+    slider.style.transform = `translateX(-${currentCardIndex * 100}%)`;
+  }
+
+  function prevCard() {
+    const total = slider.children.length;
+    if (!total) return;
+    currentCardIndex = (currentCardIndex - 1 + total) % total;
+    slider.style.transform = `translateX(-${currentCardIndex * 100}%)`;
+  }
+
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+  }
+
+  stageSelect.addEventListener('change', () => {
+    const stage = stageSelect.value;
+    if (stage && data[stage]) {
+      renderCards(stage);
+      renderSummary(stage);
+    }
+  });
+</script>
+</body>
+</html>
